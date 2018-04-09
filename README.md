@@ -1,12 +1,12 @@
-### gh-missue
+### gh-missue -- Migrate Like a Boss!
 
 [![DocStatus](https://inch-ci.org/github/E3V3A/gh-missue.svg?branch=master)](https://inch-ci.org/github/E3V3A/gh-missue)
 [![GitHub last commit](https://img.shields.io/github/last-commit/E3V3A/gh-missue.svg)](https://github.com/E3V3A/gh-missue)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/E3V3A/gh-missue/graphs/commit-activity)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/E3V3A/gh-missue.svg)](http://isitmaintained.com//project/E3V3A/gh-missue "Average time to resolve an issue")
-[![Dependency Status](https://beta.gemnasium.com/badges/github.com/(h.svg)](https://beta.gemnasium.com/projects/github.com/E3V3A/gh-missue)
+[![Dependency Status](https://beta.gemnasium.com/badges/github.com/E3V3A/gh-missue.svg)](https://beta.gemnasium.com/projects/github.com/E3V3A/gh-missue)
 
-A complete CLI GitHub issue migration tool written in Ruby.
+A complete GitHub issue migration CLI tool written in Ruby.
 
 
 | STATUS: | Version | Date | Maintained? |
@@ -15,25 +15,25 @@ A complete CLI GitHub issue migration tool written in Ruby.
 
 ---
 
-**Q:** *What does `gh-missue` do?**
+**Q:** *What does `gh-missue` do?*
 
 The primary use is for migrating selected issues from any one repository to another.
 But it can do much more. You can also:
 
-- [x] Migrate *issues*, their labels and their comments in correct order.
-- [x] List any/all issues in any puplic repository
-- [x] List or migrate only issues selected by their *status*: `[all, open, closed]`
-- [x] List all available issue *labels* for any repository
-- [x] Copy all available issue *labels* for any repository, including: `name, color, description`.
-- [x] Use 3 different types of GitHub authentication: (*none, OAuth2 token, username/password*)
-- [x] Test your current GitHub request status showing your: *rate limit, ramining requests, quota refresh time*.
-- [x] Test your authentication token
-- [x] Learn about Ruby CLI options
+- Migrate *issues*, their labels and their comments in correct order.
+- List any/all issues in any puplic repository
+- List or migrate only issues selected by their *status*: `[all, open, closed]`
+- List all available issue *labels* for any repository
+- Copy all available issue *labels* for any repository, including: `name, color, description`.
+- Use 3 different types of GitHub authentication: (*none, OAuth2 token, username/password*)
+- Test your current GitHub request status showing your: *rate limit, ramining requests, quota refresh time*.
+- Test your authentication token
+- Learn about Ruby CLI options
 - [ ] Decide to keep originally closed issues as closed or opened.
 - [ ] Use the included class in your own tools
 
 
-**Q:** *What it does **not** do?*
+**Q:** *What does it **not** do?*
 
 - Does not close issues on source repository after move
 - Does not copy time-stamps. The new time is when the issue was moved.
@@ -52,8 +52,13 @@ But, you've got all these valuable issues in the old repository on Github.
 
 I have never used Ryby until a few evenings ago. I came across an old library to migrate issues on github. 
 However, it was half broken and extremely limited. But using a library sucked and I wanted a proper CLI 
-that could handle large request rates. I decided to hack into it. Ruby is a nice suprisingly robust 
+that could handle large request rates. I decided to hack into it. Ruby is a nice and suprisingly robust 
 language and it is still alive. Not surprsingly it is used by GitHub themselves.
+
+You can read more about `Why Ruby isn't dead`: [here](https://www.engineyard.com/blog/ruby-still-isnt-dead) and 
+[here](https://expertise.jetruby.com/is-ruby-on-rails-dead-2018-edition-407a618dab3a) and 
+[here](https://www.tiobe.com/tiobe-index/ruby/).
+
 
 **Q:** *Will I continue to support this tool?*
 
@@ -68,24 +73,24 @@ This tool depends on:
 
 - [1] [docopt](https://github.com/docopt/docopt.rb/)  -- For amazingly cool command line option handling
 - [2] [octokit](https://github.com/octokit/octokit.rb/) -- For GitHub API access
-- [3] [json]()  -- 
-- [4] [net/http]()  -- 
-- [5] [uri]() -- 
+- [3] [json]()  -- For pretty printing RESPONSE
+- [4] [net/http]()  -- The cURL of Ruby 
+- [5] [uri]() -- xxx
 
 
 ### Installation 
 
 
-1. To make this run, you need to:
-   (a) have Ruby installed
-   (b) gem install GitHubs own "octokit" library
+1. To make this run, you need to:  
+   (a) have Ruby installed  
+   (b) gem install GitHubs own "octokit" library  
    (c) gem install the option parser "docopt"
 2. You should also consider creating a personal authentication token on GitHub,  
    to avoid getting rate-limited by a large number of requests in short time.
 
+---
 
-
-#### Installing Ruby on a RPi3
+**Installing Ruby on a RPi3**
 
 Installing Ruby on a Raspbian OS can be slightly tricky. There are essentailly 2 methods to do this.
 1. Installing the APK package called `Ryby3`..
@@ -93,12 +98,25 @@ Installing Ruby on a Raspbian OS can be slightly tricky. There are essentailly 2
 
 I strongly recommend to use the first option, unless you plan to use Ruby a lot in the future, and to save a lot of time.
 
-...
-TBA
+
+**Installing the native Ruby package:**
+
+```bash
+sudo apt-get install ruby2.3
+sudo gem install bundler
+```
+
+**Installing the *gem* dependecies:**
+
+```bash
+sudo gem install octokit
+sudo gem install docopt
+
+# maybe I missed some others?
+```
 
 
-
-#### Installing gh-missue
+**Installing *gh-missue***
 
 ```bash
 git clone https://github.com/E3V3A/gh-missue.git
