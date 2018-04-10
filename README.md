@@ -62,7 +62,7 @@ You can read more about `Why Ruby isn't dead`: [here](https://www.engineyard.com
 
 **Q:** *Will I continue to support this tool?*
 
-Sure, why not, but I will not spend any more time for new features. So if you wanna add something 
+Sure, if it is broken, but I will not spend any more time for new features. So if you wanna add something 
 please send me a PR.
 
 ---
@@ -71,11 +71,8 @@ please send me a PR.
 
 This tool depends on:
 
-- [1] [docopt](https://github.com/docopt/docopt.rb/)  -- For amazingly cool command line option handling
-- [2] [octokit](https://github.com/octokit/octokit.rb/) -- For GitHub API access
-- [3] [json]()  -- For pretty printing RESPONSE
-- [4] [net/http]()  -- The cURL of Ruby 
-- [5] [uri]() -- xxx
+1. [docopt](https://github.com/docopt/docopt.rb/)  -- For amazingly cool command line option handling
+2. [octokit](https://github.com/octokit/octokit.rb/) -- For GitHub API access
 
 
 ### Installation 
@@ -144,14 +141,14 @@ Feel free to fork, break, fix and contribute. Enjoy!
 
 * [github-issues-import](https://github.com/muff1nman/github-issues-import) and [mod](https://github.com/ericnewton76/github-issues-import) (Python)
 * [github-issue-mover](https://github.com/google/github-issue-mover) (Dart)
+* [go-github-issues-mover](https://github.com/UnAfraid/go-github-issues-mover) (Go)
 * [offline-issues](https://github.com/jlord/offline-issues) (JS) -- To read issues offline
-* []() ()
-* []() ()
 
 References:
 
 * [Ruby in 20 minutes](https://www.ruby-lang.org/en/documentation/quickstart/)
 * [Installing Ruby on Rail on RPi3](http://jeanbrito.com/2017/01/23/installing-ruby2-4-on-rails5-environment-on-raspberry-pi-3/)
+* [How to write a Gemfile](https://collectiveidea.com/blog/archives/2014/09/17/how-we-write-a-gemfile)
 
 
 ---
@@ -159,17 +156,17 @@ References:
 Essential GitHub API documents:
 
 * [Labels-used-for-issues](https://github.com/dotnet/roslyn/wiki/Labels-used-for-issues)
-* https://developer.github.com/v3/issues/
-* https://developer.github.com/v3/issues/labels/
-* https://developer.github.com/v3/issues/labels/#get-a-single-label
-* https://developer.github.com/v3/issues/#list-issues-for-a-repository
-* https://developer.github.com/v3/guides/best-practices-for-integrators/#dealing-with-rate-limits
+ https://developer.github.com/v3/issues/  
+ https://developer.github.com/v3/issues/labels/  
+ https://developer.github.com/v3/issues/labels/#get-a-single-label  
+ https://developer.github.com/v3/issues/#list-issues-for-a-repository  
+ https://developer.github.com/v3/guides/best-practices-for-integrators/#dealing-with-rate-limits  
 
-* https://developer.github.com/v3/#abuse-rate-limits
-* https://developer.github.com/v3/#rate-limiting
-* https://developer.github.com/v3/rate_limit/
-* https://developer.github.com/v4/guides/resource-limitations/
-* https://developer.github.com/v3/#increasing-the-unauthenticated-rate-limit-for-oauth-applications
+ https://developer.github.com/v3/#abuse-rate-limits  
+ https://developer.github.com/v3/#rate-limiting  
+ https://developer.github.com/v3/rate_limit/  
+ https://developer.github.com/v4/guides/resource-limitations/  
+ https://developer.github.com/v3/#increasing-the-unauthenticated-rate-limit-for-oauth-applications  
 
 
 ---

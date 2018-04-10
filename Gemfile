@@ -1,3 +1,7 @@
 source 'https://rubygems.org'
 
-gem "octokit", "~> 3.0"
+#ruby "2.3"
+
+gem "octokit"
+gem "docopt"
+

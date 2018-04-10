@@ -67,7 +67,7 @@ doc = <<DOCOPT
         #{__FILE__} [-d] -l <itype> [<oauth2_token>] <repo>
         #{__FILE__} -n <ilist>
         #{__FILE__} -t <itype>
-        #{__FILE__} -r [<oauth2_token>]
+        #{__FILE__} [-d] -r [<oauth2_token>]
         #{__FILE__} -d
         #{__FILE__} -v
         #{__FILE__} -h
@@ -92,7 +92,6 @@ doc = <<DOCOPT
 
   Dependencies:
         #{__FILE__} depends on the following gem packages: octokit, docopt.
-        It also depend on json, net/http, uri, but these are usually already installed.
 
 DOCOPT
 
@@ -231,6 +230,7 @@ begin
     options = Docopt::docopt(doc, version: VERSION) # help: true
 
     if options['-d']
+        debug = true
         #pp Docopt::docopt(doc, version: VERSION)
         puts "\nAvailable options are:\n#{options.inspect}\n"
         puts "\nThe supplied CLI options were:\n#{ARGV.inspect}\n\n"
@@ -275,13 +275,15 @@ begin
             uri = URI.parse("https://api.github.com/rate_limit")
         end
         res = Net::HTTP.get_response(uri) 
-        if (res.code != "200")
+        if (res.message != "OK")    # 200
             puts "ERROR: Bad reponse code: #{res.code}\n"
             puts res.body
         else
-            debug = false
+            puts "\nResponse:"
+            #debug = false
             if (debug)
-                puts "\nResponse:\nHeader:\n#{res.header}\n}" # not working?
+                #puts "\nResponse:\nHeader:\n#{res.header}\n}" # not working?
+                puts "Headers:\n#{res.to_hash.inspect}\n}"
                 puts "Body:\n#{res.body}\n\n}"
             end
             rbr = JSON.parse(res.body)['rate']
