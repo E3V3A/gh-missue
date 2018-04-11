@@ -122,10 +122,41 @@ bundle install
 
 ```
 
+---
+
+### How to Run
+
+There are several ways to run this tool. Please refer to the built-in help for details. 
+To show help, use the command option `-h`,  like this: `./gh-missue.rb -h`.
+
+To copy all the **open** issues from one repository (`<source_repo>`) to another (`<target_repo>`):
+
+1. If you want your issues to also copy the issue labels and including the `name, color, description` tags,  
+   you have to make sure the target repo does not already have any issue labels. If it does,  
+   you need to remove them first, using the github web page under *labels* settings.
+2. First copy **all** the issue labels with:  
+   `./gh-missue.rb -c <source_repo> <target_repo>`
+3. Then copy all the *open* issues with:  
+   `./gh-missue.rb -t open <source_repo> <target_repo>`
+
+
+* If you omit creating all labels, the individual issue labels used, will still be created, but without color or description.
+* If you hit a rate limit, you will need to insert your [personal access token](https://github.com/settings/tokens), before `<source_repo>`.  
+You can check your current rate limit with: `./gh-missue.rb -r`
+
+
+---
 
 #### Bugs and Warnings
 
-None
+:red_circle: If you need to copy more than 30 issues/hour, you will need to create a personal access token.  
+(Because the unauthenticated request limit is 60, and each copy operation need 2 requests.)
+ 
+
+* If you are only migrating *labels* (with the `-c` option), make sure the labels doesn't already exist
+in the target repo, or you will have a failure. I.e. there are some default lables, that you need
+to remove from your target repo!
+
 
 :information_source: For other bugs, issues, details and updates, please refer to the
 [issue tracker](https://github.com/eouia/MMM-Assistant/issues).
@@ -136,36 +167,35 @@ None
 Feel free to post issues and PR's related to this tool.
 Feel free to fork, break, fix and contribute. Enjoy!
 
+---
 
-### Recommended similar tools
+**Recommended similar tools**
 
 * [github-issues-import](https://github.com/muff1nman/github-issues-import) and [mod](https://github.com/ericnewton76/github-issues-import) (Python)
 * [github-issue-mover](https://github.com/google/github-issue-mover) (Dart)
 * [go-github-issues-mover](https://github.com/UnAfraid/go-github-issues-mover) (Go)
 * [offline-issues](https://github.com/jlord/offline-issues) (JS) -- To read issues offline
 
-References:
+**References:**
 
 * [Ruby in 20 minutes](https://www.ruby-lang.org/en/documentation/quickstart/)
 * [Installing Ruby on Rail on RPi3](http://jeanbrito.com/2017/01/23/installing-ruby2-4-on-rails5-environment-on-raspberry-pi-3/)
 * [How to write a Gemfile](https://collectiveidea.com/blog/archives/2014/09/17/how-we-write-a-gemfile)
 
 
----
+**Essential GitHub API documents:**
 
-Essential GitHub API documents:
-
-* [Labels-used-for-issues](https://github.com/dotnet/roslyn/wiki/Labels-used-for-issues)
+ [Labels-used-for-issues](https://github.com/dotnet/roslyn/wiki/Labels-used-for-issues)
  https://developer.github.com/v3/issues/  
  https://developer.github.com/v3/issues/labels/  
  https://developer.github.com/v3/issues/labels/#get-a-single-label  
  https://developer.github.com/v3/issues/#list-issues-for-a-repository  
- https://developer.github.com/v3/guides/best-practices-for-integrators/#dealing-with-rate-limits  
 
  https://developer.github.com/v3/#abuse-rate-limits  
  https://developer.github.com/v3/#rate-limiting  
  https://developer.github.com/v3/rate_limit/  
  https://developer.github.com/v4/guides/resource-limitations/  
+ https://developer.github.com/v3/guides/best-practices-for-integrators/#dealing-with-rate-limits  
  https://developer.github.com/v3/#increasing-the-unauthenticated-rate-limit-for-oauth-applications  
 
 
@@ -180,7 +210,6 @@ Most grateful thanks to:
 
 #### License
 
-[![GitHub license](https://img.shields.io/github/license/E3V3A/gh-missue.svg)](https://github.com/E3V3A/gh-missue/blob/master/LICENSE)
-
+[![GitHub license](https://img.shields.io/github/license/E3V3A/gh-missue.svg)](https://github.com/E3V3A/gh-missue/blob/master/LICENSE) 
 A license to :sparkling_heart:!
 

@@ -61,9 +61,9 @@ doc = <<DOCOPT
     authentication token.
 
   Usage:
-        #{__FILE__} [-c] [-n <ilist> | -t <itype>] <source_repo> <target_repo>
-        #{__FILE__} [-c] [-n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
-        #{__FILE__} [-c] [-n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
+        #{__FILE__} [-c | -n <ilist> | -t <itype>] <source_repo> <target_repo>
+        #{__FILE__} [-c | -n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
+        #{__FILE__} [-c | -n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
         #{__FILE__} [-d] -l <itype> [<oauth2_token>] <repo>
         #{__FILE__} -n <ilist>
         #{__FILE__} -t <itype>
@@ -302,8 +302,11 @@ begin
         source_repo = options['<source_repo>']
         target_repo = options['<target_repo>']
         im = IssueMigrator.new("#{access_token}", "#{source_repo}", "#{target_repo}")
-        im.create_target_labels
-        exit if options['-c']
+        if options['-c']
+            im.create_target_labels
+            exit
+        end
+        #exit if options['-c']
         im.pull_source_issues(itype)    # add ilist
         #im.list_source_issues(itype)   # 
         im.push_issues
