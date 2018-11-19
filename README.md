@@ -4,7 +4,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/E3V3A/gh-missue.svg)](https://github.com/E3V3A/gh-missue)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/E3V3A/gh-missue/graphs/commit-activity)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/E3V3A/gh-missue.svg)](http://isitmaintained.com//project/E3V3A/gh-missue "Average time to resolve an issue")
-[![Dependency Status](https://beta.gemnasium.com/badges/github.com/E3V3A/gh-missue.svg)](https://beta.gemnasium.com/projects/github.com/E3V3A/gh-missue)
+
 
 A complete GitHub issue migration CLI tool written in Ruby.
 
