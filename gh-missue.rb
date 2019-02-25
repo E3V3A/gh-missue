@@ -179,7 +179,8 @@ class IssueMigrator
             source_labels = get_source_labels(source_issue)
             source_comments = get_source_comments(source_issue)
             if !source_issue.key?(:pull_request) || source_issue.pull_request.empty?
-                target_issue = @client.create_issue(@target_repo, source_issue.title, source_issue.body, {labels: source_labels})
+                issue_body = "*Originally created by @#{source_issue.user[:login]} (#{source_issue.html_url}):*\n\n#{source_issue.body}"
+                target_issue = @client.create_issue(@target_repo, source_issue.title, issue_body, {labels: source_labels})
                 push_comments(target_issue, source_comments) unless source_comments.empty?
                 @client.close_issue(@target_repo, target_issue.number) if source_issue.state === 'closed'
             end
