@@ -10,6 +10,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+#### [1.0.2] - 2022-01-25
+
+- Fix for Authenticating with the new GitHub API changes 
+- Improved formatting of the `-l` list output
+- Updated the README
+- Added Screenshots
+- Added coloring for the label list
+
 
 #### [1.0.1] - 2018-04-10
 

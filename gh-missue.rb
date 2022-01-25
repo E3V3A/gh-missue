@@ -3,6 +3,8 @@
 #==================================================================================================
 # Author:       E:V:A
 # Date:         2018-04-10
+# Change:       2022-01-25
+# Version:      1.0.2
 # License:      ISC
 # Formatting    UTF-8 with 4-space TAB stops and no TAB chars.
 # URL:          https://github.com/E3V3A/gh-missue
@@ -12,41 +14,48 @@
 #               using OAuth2 authentication to increase speed and prevent rate limiting.
 #
 # Dependencies:
-#       [1] docopt  https://github.com/docopt/docopt.rb/
-#       [2] octokit https://github.com/octokit/octokit.rb/
+#       [1] docopt  https://github.com/docopt/docopt.rb/        # option parser
+#       [2] octokit https://github.com/octokit/octokit.rb/      # GitHubs API library
 # 
 # NOTE:
 #
-#   1. To make this run, you need to:
-#           (a) have Ruby installed
-#           (b) gem install GitHubs own "octokit" library
-#           (c) gem install the option parser "docopt" 
-#   2. You should also consider creating a personal authentication token on GitHub,
+#   1. To make this run, you need to install Ruby with:
+#           (a) winget install ruby
+#           (b) gem install octokit
+#           (c) gem install docopt
+#
+#   2. Clone latest version of this file
+# 
+#   3. You should also consider creating a personal authentication token on GitHub,
 #      to avoid getting rate-limited by a large number of requests in short time.
 #
 # ToDo: 
 #   
-#   [ ] Fix username/password authentication
+#   [ ] Add -a option to NOT copy original author & URL into migrated issue
+#   [ ] Fix username/password authentication ?? (Maybe Deprecated?)
+#   [ ] Check environment variable for OAUTH token:   
+#       access_token = "#{ENV['GITHUB_OAUTH_TOKEN']}"
 #   [ ] Fix inclusion of CLI options: -d, -n  
 #       -d              - show debug info with full option list, raw requests & responses etc.
 #       -n  <1,3-6,9>   - only migrate issues given by the list. Can be a range.
-#       
+#   [/] Fix new Authentication issues
+#   [ ] Make the issue vs PR selection smarter! 
+#       - Now it just takes ALL and filters using list_source_issues()
+#   [ ] ? Add <type> option to selec pr, vs issue:  '-p <type>'   where <type> = [issue, pr]
+# 
+# References:
+# 
+#   [1] https://developer.github.com/changes/2020-02-10-deprecating-auth-through-query-param/
+#   [2] https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
+#   [3] 
+# 
 #==================================================================================================
-
-# Use Ruby3 "frozen" in Ruby2
-# frozen_string_literal: true
-
-#require './lib/issue_migrator.rb'
-#require 'pp
-
 require 'docopt'
 require 'octokit'
-
 require 'net/http'
-require 'uri'
 require 'json'
 
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 options = {}
 
 #--------------------------------------------------------------------------------------------------
@@ -103,23 +112,32 @@ class IssueMigrator
     # attr_accessor :issues, :client, :target_repo, :source_repo
     attr_accessor :access_token, :issues, :ilist, :itype, :client, :target_repo, :source_repo
 
+    def hex2rgb(hex)
+        # Usage: print hex2rgb("d73a4a") - prints a RGB colored box from hex
+        r,g,b = hex.match(/^(..)(..)(..)$/).captures.map(&:hex)
+        s = "\e[48;2;#{r};#{g};#{b}m  \e[0m"
+    end
+    
+    # curl -v -H "Authorization: token <MY-40-CHAR-TOKEN>" \ 
+    #         -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/E3V3A/gh-missue/issues
     def initialize(access_token, source_repo, target_repo)
-        @client = Octokit::Client.new( :access_token => access_token, 
-            # :accept => 'application/vnd.github.symmetra-preview+json',
+        @client = Octokit::Client.new( 
+            :access_token => access_token,
+            :accept => 'application/vnd.github.v3+json',
+            :headers => { "Authorization" => "token " + access_token },
             # :headers => { "X-GitHub-OTP" => "<your 2FA token>" }
-            per_page: 100 )
 
             # // Personal OAuth2 Access Token
             #:access_token => "YOUR_40_CHAR_OATH2_TOKEN"
 
-            # // Standard GitHub Credentials
-            #:login => username,
-            #:password => password
-
-            # // OAuth2 App Credentials
+            # // OAuth2 App Credentials  (DEPRECATED!)
+            # NEW use:  
+            # curl -u my_client_id:my_client_secret https://api.github.com/user/repos
             #:client_id     => "<YOUR_20_CHAR_OATH2_ID>",
             #:client_secret => "<YOUR_40_CHAR_OATH2_SECRET>"
-
+            
+            per_page: 100 
+        )
         user = client.user
         user.login
         @source_repo = source_repo
@@ -137,7 +155,8 @@ class IssueMigrator
     def list_source_issues(itype)
         pull_source_issues(itype)
         @issues.each do |source_issue|
-            puts "[#{source_issue.number}]\t  #{source_issue.title}"
+            #puts "[#{source_issue.number}]\t  #{source_issue.title}"
+            puts "[#{source_issue.number}]".ljust(10) + "#{source_issue.title}"
         end
         puts
     end
@@ -146,8 +165,12 @@ class IssueMigrator
         @client.auto_paginate = true
         @labels = @client.labels(@source_repo.freeze, accept: 'application/vnd.github.symmetra-preview+json')
         puts "Found #{@labels.size} issue labels:"
+        # ToDo: check and handle length (in case > 20)
         @labels.each do |label|
-            puts "[#{label.color}]  #{label.name} :  #{label.description}"
+            # ToDo:  Add "  " colored "boxes" using the color of the tag.
+            color_box = hex2rgb("#{label.color}") + "  "
+            #puts "[#{label.color}]  " + "#{label.name}".ljust(20) + ": #{label.description}"
+            puts "[#{label.color}]  " + color_box + "#{label.name}".ljust(20) + ": #{label.description}"
         end
         puts
     end
@@ -160,7 +183,9 @@ class IssueMigrator
         puts "Copying labels..."
         tlabel = "" # nil
         @source_labels.each do |lbl|
-            puts "[#{lbl.color}]  #{lbl.name} :  #{lbl.description}"
+            # ToDo:  Add "  " colored "boxes" using the color of the tag.
+            #puts "[#{lbl.color}]  #{lbl.name} :  #{lbl.description}"
+            puts "[#{lbl.color}]  " + "#{lbl.name}".ljust(20) + ": #{lbl.description}"
             #tlabel = {"name": lbl.name, "description": lbl.description, "color": lbl.color}
             #tlabel = {lbl.name, lbl.color, description: lbl.description}
             #lab = client.add_label(@target_repo.freeze, accept: 'application/vnd.github.symmetra-preview+json', tlabel)
@@ -179,7 +204,13 @@ class IssueMigrator
             source_labels = get_source_labels(source_issue)
             source_comments = get_source_comments(source_issue)
             if !source_issue.key?(:pull_request) || source_issue.pull_request.empty?
-                target_issue = @client.create_issue(@target_repo, source_issue.title, source_issue.body, {labels: source_labels})
+
+                # PR#2
+                issue_body = "*Originally created by @#{source_issue.user[:login]} (#{source_issue.html_url}):*\n\n#{source_issue.body}"
+                target_issue = @client.create_issue(@target_repo, source_issue.title, issue_body, {labels: source_labels})
+
+                #target_issue = @client.create_issue(@target_repo, source_issue.title, source_issue.body, {labels: source_labels})
+
                 push_comments(target_issue, source_comments) unless source_comments.empty?
                 @client.close_issue(@target_repo, target_issue.number) if source_issue.state === 'closed'
             end
@@ -222,11 +253,17 @@ end
 #if __FILE__ == $0
 begin
 
+    hLine = "-"*72
+    puts
+
     def sort_list(ilist)
         # "12,3-5,2,6,35-38" --> [2,3,4,5,6,12,35,36,37,38]
         ilist.gsub(/(\d+)-(\d+)/) { ($1..$2).to_a.join(',') }.split(',').map(&:to_i).sort.uniq
     end
 
+    #----------------------------------------------------------------------
+    # CLI Options
+    #----------------------------------------------------------------------
     options = Docopt::docopt(doc, version: VERSION) # help: true
 
     if options['-d']
@@ -240,6 +277,7 @@ begin
         access_token = options['<oauth2_token>']
         if access_token.size != 40 
             puts "Error: The github access token has to be 40 characters long!"
+            puts "       (Yours was: #{access_token.size} characters.)"
             exit
         else 
             puts "Using access_token: #{access_token}" if options['-d']
@@ -247,9 +285,13 @@ begin
     end
 
     # -l <itype> <source_repo>
+    # https://docs.github.com/en/rest/reference/issues#list-repository-issues
+    # GET /repos/{owner}/{repo}/issues
+    # curl -v -H "Authorization: token <MY-40-CHAR-TOKEN>" \ 
+    #         -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/E3V3A/gh-missue/issues
     if ( options['-l'] )
         itype = options['-l']
-        source_repo =  options['<repo>']
+        source_repo = options['<repo>']
         target_repo = "E3V3A/TESTT" # a dummy repo
         im = IssueMigrator.new("#{access_token}", "#{source_repo}", "#{target_repo}")
         im.list_source_issues(itype)
@@ -266,31 +308,69 @@ begin
         puts "The sorted issue list  : #{sorted}"
     end
 
-    # -r / curl -i -G 'https://api.github.com/rate_limit?access_token=xxxx'
+    # -r 
+    # https://docs.github.com/en/rest/reference/rate-limit
+    # NEW:  curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit
+    #       curl -H "Accept: application/vnd.github.v3+json" \ 
+    #            -H "Authorization: token <MY-40-CHAR-TOKEN>" https://api.github.com/rate_limit
+
     if ( options['-r'] )
+
+        #access_token = "#{ENV['GITHUB_OAUTH_TOKEN']}"
+        #access_token = "<MY-40-CHAR-TOKEN>"
+
+        url = URI("https://api.github.com/rate_limit")
+        http = Net::HTTP.new(url.host, url.port)
+        http.use_ssl = true
+
+        req = Net::HTTP::Get.new(url)
+        req["User-Agent"] = "gh-missue"
+        req["Accept"]     = "application/vnd.github.v3+json"
+
         if (access_token)
             puts "Using access_token: #{access_token}" 
-            uri = URI.parse("https://api.github.com/rate_limit?access_token=#{access_token}")
-        else 
-            uri = URI.parse("https://api.github.com/rate_limit")
+            req["Authorization"] = "token #{access_token}" 
         end
-        res = Net::HTTP.get_response(uri) 
+
+        res = http.request(req) 
+        
+        if (debug)
+            puts res.read_body
+        end
+        
         if (res.message != "OK")    # 200
             puts "ERROR: Bad reponse code: #{res.code}\n"
             puts res.body
         else
-            puts "\nResponse:"
             #debug = false
             if (debug)
-                #puts "\nResponse:\nHeader:\n#{res.header}\n}" # not working?
-                puts "Headers:\n#{res.to_hash.inspect}\n}"
-                puts "Body:\n#{res.body}\n\n}"
+                puts hLine + "\nResponse Headers:\n" + hLine
+                puts "#{res.to_hash.inspect}\n"
+                puts hLine + "\nBody:\n" + hLine
+                puts "#{res.body}\n" + hLine
             end
-            rbr = JSON.parse(res.body)['rate']
-            RT = Time.at(rbr['reset'])
-            puts "Rate limit : #{rbr['limit']}"
-            puts "Remaining  : #{rbr['remaining']}"
-            puts "Refresh at : #{RT}"
+
+            #----------------------------------------------------------------------
+            # NEW:  resources: {core, graphql, integration_manifest, search }
+            #       (There are more!)
+            # Rate Limit Status:
+            # core                  : for all non-search-related resources in the REST API.
+            # search                : for the Search API.
+            # graphql               : for the GraphQL API.
+            # integration_manifest  : for the GitHub App Manifest code conversion endpoint.
+            #----------------------------------------------------------------------
+            rbr = JSON.parse(res.body)['resources']['core']
+            RTc = Time.at(rbr['reset'])
+            puts "\nCore"
+            puts "  Rate limit   : #{rbr['limit']}"
+            puts "  Remaining    : #{rbr['remaining']}"
+            puts "  Refresh at   : #{RTc}"
+            puts "Search"
+            rbs = JSON.parse(res.body)['resources']['search']
+            RTs = Time.at(rbs['reset'])
+            puts "  Search limit : #{rbs['limit']}"
+            puts "  Remaining    : #{rbs['remaining']}"
+            puts "  Refresh at   : #{RTs}"
         end
     end
     

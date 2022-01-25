@@ -1,2 +1,12 @@
+# Lock files
 Gemfile.lock
-docs/
+
+# Setuptools distribution folders
+/dist/
+/build/
+
+# git
+/.git/
+
+# various dev junk
+/junk/

@@ -11,7 +11,7 @@
 
 For new bugs and issues, please **make sure** to:
 - [ ] get info about your system configuration, if relevant. Post the output of:  
-   `node -v && npm -v; uname -a; sudo lsb_release -a;`
+   `ruby -v && gem list; uname -a; sudo lsb_release -a;`
 - [ ] include detailed information on what you did before the *error/issue* occurred.
 - [ ] use code mark-down using 3 back-ticks (```), to enclose multi-line code/input/output.
 - [ ] include a **screenshot** for issues concerning *layouts, formatting* or other UI stuff. 

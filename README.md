@@ -11,7 +11,8 @@ A complete GitHub issue migration CLI tool written in Ruby.
 
 | STATUS: | Version | Date | Maintained? |
 |:------- |:------- |:---- |:----------- |
-| Working | `1.0.1` | 2018-04-10 | YES |
+| Working | `1.0.2` | 2022-01-25 | YES |
+
 
 ---
 
@@ -67,6 +68,15 @@ please send me a PR.
 
 ---
 
+#### Screenshots! 
+
+![Full](./docs/screen1.png "gh-missue like a boss!)
+<sub>(FFS always include a screenshot in your GitHub repo!)</sub>
+ 
+![Full](./docs/screen2.png "xxx")
+<!-- ![Full](./docs/screen3.png "xxx") -->
+
+
 ### Dependencies
 
 This tool depends on:
@@ -77,13 +87,79 @@ This tool depends on:
 
 ### Installation 
 
-
 1. To make this run, you need to:  
-   (a) have Ruby installed  
-   (b) gem install GitHubs own "octokit" library  
-   (c) gem install the option parser "docopt"
-2. You should also consider creating a personal authentication token on GitHub,  
-   to avoid getting rate-limited by a large number of requests in short time.
+   (a) Manually install the `WITHOUT DEVKIT` version of Ruby from [here](https://rubyinstaller.org/downloads/), or use: 
+       `winget install ruby` 
+   (b) `gem install octokit`  
+   (c) `gem install docopt` 
+   (d) Clone this repo:  
+       `git clone https://github.com/E3V3A/gh-missue.git`
+
+2. You also **have to** create a personal authentication token for your GitHub
+   account. This is needed to be able to push the new issues and labels into 
+   your own repos. It also avoid you getting rate-limited by a large number 
+   of requests in short time. Learn how to do this [here]().
+
+3. Run and test the app with:  
+
+```Ruby
+# check version:
+ruby.exe -V
+
+# List the current open issues (and labels) for this repo:
+ruby.exe .\gh-missue.rb -l open "YOUR_40_CHAR_OATH2_TOKEN" "E3V3A/gh-missue"
+
+# Same as above, but with some more Warnings & Debug output:
+ruby.exe -W2 .\gh-missue.rb -d -l open "YOUR_40_CHAR_OATH2_TOKEN" "E3V3A/gh-missue"
+
+# Check your current gitHub API Rate Limits:
+ruby.exe .\gh-missue.rb -r "YOUR_40_CHAR_OATH2_TOKEN"
+```
+
+### Usage
+
+```
+ $ ruby.exe .\gh-missue.rb -h
+
+Description:
+
+    gh-missue is a Ruby program that migrate issues from one github repository to another.
+    Please note that you can only migrate issues to your own repo, unless you have an OAuth2
+    authentication token.
+
+  Usage:
+        ./gh-missue.rb [-c | -n <ilist> | -t <itype>] <source_repo> <target_repo>
+        ./gh-missue.rb [-c | -n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
+        ./gh-missue.rb [-c | -n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
+        ./gh-missue.rb [-d] -l <itype> [<oauth2_token>] <repo>
+        ./gh-missue.rb -n <ilist>
+        ./gh-missue.rb -t <itype>
+        ./gh-missue.rb [-d] -r [<oauth2_token>]
+        ./gh-missue.rb -d
+        ./gh-missue.rb -v
+        ./gh-missue.rb -h
+
+  Options:
+
+        -c                  - only copy all issue labels from <source> to <target> repos, including name, color and description
+        -l <itype> <repo>   - list available issues of type <itype> (all,open,closed) and all labels in repository <repo>
+        -t <itype>          - specify what type (all,open,closed) of issues to migrate. [default: open]
+        -r                  - show current rate limit and authentication method for your IP
+        -d                  - show debug info with full option list, raw requests & responses etc.
+        -n <ilist>          - only migrate issues with comma separated numbers given by the list. Can include a range.
+        -h, --help          - show this help message and exit
+        -v, --version       - show version and exit
+
+  Examples:
+
+        ./gh-missue.rb -r
+        ./gh-missue.rb -l open E3V3A/MMM-VOX
+        ./gh-missue.rb -t closed "E3V3A/TESTO" "USERNAME/REPO"
+        ./gh-missue.rb -n 1,4-5 "E3V3A/TESTO" "USERNAME/REPO"
+
+  Dependencies:
+        ./gh-missue.rb depends on the following gem packages: octokit, docopt.
+```
 
 ---
 
@@ -99,7 +175,7 @@ I strongly recommend to use the first option, unless you plan to use Ruby a lot 
 **Installing the native Ruby package:**
 
 ```bash
-sudo apt-get install ruby2.3
+sudo apt-get install ruby3.1
 sudo gem install bundler
 ```
 
@@ -154,12 +230,12 @@ You can check your current rate limit with: `./gh-missue.rb -r`
  
 
 * If you are only migrating *labels* (with the `-c` option), make sure the labels doesn't already exist
-in the target repo, or you will have a failure. I.e. there are some default lables, that you need
+in the target repo, or you will have a failure. I.e. there are some default labels, that you need
 to remove from your target repo!
 
 
 :information_source: For other bugs, issues, details and updates, please refer to the
-[issue tracker](https://github.com/eouia/MMM-Assistant/issues).
+[issue tracker](https://github.com/E3V3A/gh-missue/issues).
 
 
 #### Contribution
@@ -168,13 +244,6 @@ Feel free to post issues and PR's related to this tool.
 Feel free to fork, break, fix and contribute. Enjoy!
 
 ---
-
-**Recommended similar tools**
-
-* [github-issues-import](https://github.com/muff1nman/github-issues-import) and [mod](https://github.com/ericnewton76/github-issues-import) (Python)
-* [github-issue-mover](https://github.com/google/github-issue-mover) (Dart)
-* [go-github-issues-mover](https://github.com/UnAfraid/go-github-issues-mover) (Go)
-* [offline-issues](https://github.com/jlord/offline-issues) (JS) -- To read issues offline
 
 **References:**
 
@@ -185,18 +254,11 @@ Feel free to fork, break, fix and contribute. Enjoy!
 
 **Essential GitHub API documents:**
 
- [Labels-used-for-issues](https://github.com/dotnet/roslyn/wiki/Labels-used-for-issues)
- https://developer.github.com/v3/issues/  
- https://developer.github.com/v3/issues/labels/  
- https://developer.github.com/v3/issues/labels/#get-a-single-label  
- https://developer.github.com/v3/issues/#list-issues-for-a-repository  
 
- https://developer.github.com/v3/#abuse-rate-limits  
- https://developer.github.com/v3/#rate-limiting  
- https://developer.github.com/v3/rate_limit/  
- https://developer.github.com/v4/guides/resource-limitations/  
- https://developer.github.com/v3/guides/best-practices-for-integrators/#dealing-with-rate-limits  
- https://developer.github.com/v3/#increasing-the-unauthenticated-rate-limit-for-oauth-applications  
+[1] https://developer.github.com/v3/issues/  
+[2] https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting  
+[3] https://docs.github.com/en/rest/overview/media-types#request-specific-version  
+[4] Some ideas for [Labels-used-for-issues](https://github.com/dotnet/roslyn/wiki/Labels-used-for-issues)  
 
 
 ---
@@ -204,12 +266,12 @@ Feel free to fork, break, fix and contribute. Enjoy!
 #### Credits
 
 Most grateful thanks to:
-* [---](https://github.com/---/) - for clarifying and fixing XXXX
+* [Xanewok](https://github.com/Xanewok/) - for adding original author & issue link functionality 
 
 ---
 
 #### License
 
-[![GitHub license](https://img.shields.io/github/license/E3V3A/gh-missue.svg)](https://github.com/E3V3A/gh-missue/blob/master/LICENSE) 
+[![GitHub license](https://img.shields.io/github/license/E3V3A/gh-missue.svg)](https://github.com/E3V3A/gh-missue/blob/master/LICENSE)  
 A license to :sparkling_heart:!
 

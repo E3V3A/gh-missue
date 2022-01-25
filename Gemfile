@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-#ruby "2.3"
+#ruby "3.1"
 
 gem "octokit"
 gem "docopt"
