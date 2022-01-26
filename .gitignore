@@ -1,5 +1,10 @@
-# Lock files
+#-----------------------------------------------------------
+# Ruby Specific .gitignore
+#-----------------------------------------------------------
+
+# Build artifacts and lock files
 Gemfile.lock
+*.gem
 
 # Setuptools distribution folders
 /dist/

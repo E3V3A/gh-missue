@@ -89,8 +89,18 @@ This tool depends on:
 
 ### Installation 
 
+**Automatic** install:
+
+We are now in the public repo, under [`missue`](https://rubygems.org/gems/missue).
+
+`gem install missue`
+
+
+**Manual** install:
+
 1. To make this run, you need to:  
-   (a) Manually install the `WITHOUT DEVKIT` version of Ruby from [here](https://rubyinstaller.org/downloads/), or use: 
+   (a) Have Ruby installed.  
+       You can Manually install the `WITHOUT DEVKIT` version of Ruby from [here](https://rubyinstaller.org/downloads/), or use: 
        `winget install ruby` 
    (b) `gem install octokit`  
    (c) `gem install docopt` 
@@ -106,7 +116,7 @@ This tool depends on:
 
 ```Ruby
 # check version:
-ruby.exe -V
+ruby.exe -v
 
 # List the current open issues (and labels) for this repo:
 ruby.exe .\gh-missue.rb -l open "YOUR_40_CHAR_OATH2_TOKEN" "E3V3A/gh-missue"
