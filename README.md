@@ -100,10 +100,10 @@ We are now in the public repo, under [`missue`](https://rubygems.org/gems/missue
 
 1. To make this run, you need to:  
    (a) Have Ruby installed.  
-       You can Manually install the `WITHOUT DEVKIT` version of Ruby from [here](https://rubyinstaller.org/downloads/), or use: 
-       `winget install ruby` 
+       You can Manually install the `WITHOUT DEVKIT` version of Ruby from [here](https://rubyinstaller.org/downloads/), or use:  
+       `winget install ruby`  
    (b) `gem install octokit`  
-   (c) `gem install docopt` 
+   (c) `gem install docopt`  
    (d) Clone this repo:  
        `git clone https://github.com/E3V3A/gh-missue.git`
 
