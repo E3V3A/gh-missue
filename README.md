@@ -110,7 +110,7 @@ We are now in the public repo, under [`missue`](https://rubygems.org/gems/missue
 2. You also **have to** create a personal authentication token for your GitHub
    account. This is needed to be able to push the new issues and labels into 
    your own repos. It also avoid you getting rate-limited by a large number 
-   of requests in short time. Learn how to do this [here]().
+   of requests in short time. Learn how to do this [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
 3. Run and test the app with:  
 
@@ -119,19 +119,19 @@ We are now in the public repo, under [`missue`](https://rubygems.org/gems/missue
 ruby.exe -v
 
 # List the current open issues (and labels) for this repo:
-ruby.exe .\gh-missue.rb -l open "YOUR_40_CHAR_OATH2_TOKEN" "E3V3A/gh-missue"
+ruby.exe .\missue.rb -l open "YOUR_40_CHAR_OATH2_TOKEN" "E3V3A/gh-missue"
 
 # Same as above, but with some more Warnings & Debug output:
-ruby.exe -W2 .\gh-missue.rb -d -l open "YOUR_40_CHAR_OATH2_TOKEN" "E3V3A/gh-missue"
+ruby.exe -W2 .\missue.rb -d -l open "YOUR_40_CHAR_OATH2_TOKEN" "E3V3A/gh-missue"
 
 # Check your current gitHub API Rate Limits:
-ruby.exe .\gh-missue.rb -r "YOUR_40_CHAR_OATH2_TOKEN"
+ruby.exe .\missue.rb -r "YOUR_40_CHAR_OATH2_TOKEN"
 ```
 
 ### Usage
 
 ```
- $ ruby.exe .\gh-missue.rb -h
+ $ ruby.exe .\missue.rb -h
 
 Description:
 
@@ -140,16 +140,16 @@ Description:
     authentication token.
 
   Usage:
-        ./gh-missue.rb [-c | -n <ilist> | -t <itype>] <source_repo> <target_repo>
-        ./gh-missue.rb [-c | -n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
-        ./gh-missue.rb [-c | -n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
-        ./gh-missue.rb [-d] -l <itype> [<oauth2_token>] <repo>
-        ./gh-missue.rb -n <ilist>
-        ./gh-missue.rb -t <itype>
-        ./gh-missue.rb [-d] -r [<oauth2_token>]
-        ./gh-missue.rb -d
-        ./gh-missue.rb -v
-        ./gh-missue.rb -h
+        ./missue.rb [-c | -n <ilist> | -t <itype>] <source_repo> <target_repo>
+        ./missue.rb [-c | -n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
+        ./missue.rb [-c | -n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
+        ./missue.rb [-d] -l <itype> [<oauth2_token>] <repo>
+        ./missue.rb -n <ilist>
+        ./missue.rb -t <itype>
+        ./missue.rb [-d] -r [<oauth2_token>]
+        ./missue.rb -d
+        ./missue.rb -v
+        ./missue.rb -h
 
   Options:
 
@@ -164,51 +164,15 @@ Description:
 
   Examples:
 
-        ./gh-missue.rb -r
-        ./gh-missue.rb -l open E3V3A/MMM-VOX
-        ./gh-missue.rb -t closed "E3V3A/TESTO" "USERNAME/REPO"
-        ./gh-missue.rb -n 1,4-5 "E3V3A/TESTO" "USERNAME/REPO"
+        ./missue.rb -r
+        ./missue.rb -l open E3V3A/MMM-VOX
+        ./missue.rb -t closed "E3V3A/TESTO" "USERNAME/REPO"
+        ./missue.rb -n 1,4-5 "E3V3A/TESTO" "USERNAME/REPO"
 
   Dependencies:
-        ./gh-missue.rb depends on the following gem packages: octokit, docopt.
+        ./missue.rb depends on the following gem packages: octokit, docopt.
 ```
 
----
-
-**Installing Ruby on a RPi3**
-
-Installing Ruby on a Raspbian OS can be slightly tricky. There are essentailly 2 methods to do this.
-1. Installing the APK package called `Ryby3`..
-2. Installing Ruby from sources
-
-I strongly recommend to use the first option, unless you plan to use Ruby a lot in the future, and to save a lot of time.
-
-
-**Installing the native Ruby package:**
-
-```bash
-sudo apt-get install ruby3.1
-sudo gem install bundler
-```
-
-**Installing the *gem* dependecies:**
-
-```bash
-sudo gem install octokit
-sudo gem install docopt
-
-# maybe I missed some others?
-```
-
-
-**Installing *gh-missue***
-
-```bash
-git clone https://github.com/E3V3A/gh-missue.git
-cd gh-missue
-bundle install
-
-```
 
 ---
 
@@ -237,16 +201,14 @@ You can check your current rate limit with: `./gh-missue.rb -r`
 
 #### Bugs and Warnings
 
-:red_circle: If you need to copy more than 30 issues/hour, you will need to create a personal access token.  
-(Because the unauthenticated request limit is 60, and each copy operation need 2 requests.)
- 
+* :red_circle: If you need to copy more than 30 issues/hour, you will need to create a personal access token.  
+  (Because the unauthenticated request limit is 60, and each copy operation need 2 requests.)
 
 * If you are only migrating *labels* (with the `-c` option), make sure the labels doesn't already exist
 in the target repo, or you will have a failure. I.e. there are some default labels, that you need
 to remove from your target repo!
 
-
-:information_source: For other bugs, issues, details and updates, please refer to the
+* :information_source: For other bugs, issues, details and updates, please refer to the
 [issue tracker](https://github.com/E3V3A/gh-missue/issues).
 
 
