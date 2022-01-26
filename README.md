@@ -70,10 +70,10 @@ please send me a PR.
 
 #### Screenshots! 
 
-![Full](./docs/screen1.png "gh-missue like a boss!)
+![Full](./docs/screen1.png "gh-missue like a boss!")  
 <sub>(FFS always include a screenshot in your GitHub repo!)</sub>
  
-![Full](./docs/screen2.png "xxx")
+![Full](./docs/screen2.png "xxx")  
 <!-- ![Full](./docs/screen3.png "xxx") -->
 
 
