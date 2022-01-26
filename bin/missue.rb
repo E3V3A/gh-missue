@@ -50,6 +50,7 @@
 #   [3] 
 # 
 #==================================================================================================
+require 'pathname'
 require 'docopt'
 require 'octokit'
 require 'net/http'
@@ -57,6 +58,10 @@ require 'json'
 
 VERSION = '1.0.2'
 options = {}
+
+# Remap __FILE__ to avoid long path on '-h' help page
+pn = Pathname.new(__FILE__)
+__BASE__ = pn.basename
 
 #--------------------------------------------------------------------------------------------------
 # The cli options parser
@@ -70,16 +75,16 @@ doc = <<DOCOPT
     authentication token.
 
   Usage:
-        #{__FILE__} [-c | -n <ilist> | -t <itype>] <source_repo> <target_repo>
-        #{__FILE__} [-c | -n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
-        #{__FILE__} [-c | -n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
-        #{__FILE__} [-d] -l <itype> [<oauth2_token>] <repo>
-        #{__FILE__} -n <ilist>
-        #{__FILE__} -t <itype>
-        #{__FILE__} [-d] -r [<oauth2_token>]
-        #{__FILE__} -d
-        #{__FILE__} -v
-        #{__FILE__} -h
+        #{__BASE__} [-c | -n <ilist> | -t <itype>] <source_repo> <target_repo>
+        #{__BASE__} [-c | -n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
+        #{__BASE__} [-c | -n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
+        #{__BASE__} [-d] -l <itype> [<oauth2_token>] <repo>
+        #{__BASE__} -n <ilist>
+        #{__BASE__} -t <itype>
+        #{__BASE__} [-d] -r [<oauth2_token>]
+        #{__BASE__} -d
+        #{__BASE__} -v
+        #{__BASE__} -h
 
   Options:
 
@@ -94,13 +99,13 @@ doc = <<DOCOPT
 
   Examples:
 
-        #{__FILE__} -r
-        #{__FILE__} -l open E3V3A/MMM-VOX
-        #{__FILE__} -t closed "E3V3A/TESTO" "USERNAME/REPO"
-        #{__FILE__} -n 1,4-5 "E3V3A/TESTO" "USERNAME/REPO"
+        #{__BASE__} -r
+        #{__BASE__} -l open E3V3A/MMM-VOX
+        #{__BASE__} -t closed "E3V3A/TESTO" "USERNAME/REPO"
+        #{__BASE__} -n 1,4-5 "E3V3A/TESTO" "USERNAME/REPO"
 
   Dependencies:
-        #{__FILE__} depends on the following gem packages: octokit, docopt.
+        #{__BASE__} depends on the following gem packages: octokit, docopt.
 
 DOCOPT
 
