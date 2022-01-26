@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file.
 - Added coloring for the label list
 - Made into a gem ("missue") and uploaded to rubygems.org
 - Moved gh-missue.rb script into bin/missue.rb for gem installation support
-
+- Added lost username for commits...
 
 #### [1.0.1] - 2018-04-10
 
