@@ -1,17 +1,12 @@
 ### gh-missue -- Migrate Like a Boss!
 
-[![DocStatus](https://inch-ci.org/github/E3V3A/gh-missue.svg?branch=master)](https://inch-ci.org/github/E3V3A/gh-missue)
-[![GitHub last commit](https://img.shields.io/github/last-commit/E3V3A/gh-missue.svg)](https://github.com/E3V3A/gh-missue)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/E3V3A/gh-missue/graphs/commit-activity)
+[![Gem Version](https://badge.fury.io/rb/missue.svg)](https://badge.fury.io/rb/missue "Last Uploaded Gem Version")
+[![GitHub last commit](https://img.shields.io/github/last-commit/E3V3A/gh-missue.svg)](https://github.com/E3V3A/gh-missue "Last commit time/day")
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/E3V3A/gh-missue/graphs/commit-activity "Is this repo maintained?")
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/E3V3A/gh-missue.svg)](http://isitmaintained.com//project/E3V3A/gh-missue "Average time to resolve an issue")
 
 
 A complete GitHub issue migration CLI tool written in Ruby.
-
-
-| STATUS: | Version | Date | Maintained? |
-|:------- |:------- |:---- |:----------- |
-| Working | `1.0.2` | 2022-01-25 | YES |
 
 
 ---
@@ -22,16 +17,15 @@ The primary use is for migrating selected issues from any one repository to anot
 But it can do much more. You can also:
 
 - Migrate *issues*, their labels and their comments in correct order.
+- `WIP` Migrate originally *closed* issues as *closed* **or** *opened*.
 - List any/all issues in any puplic repository
 - List or migrate only issues selected by their *status*: `[all, open, closed]`
 - List all available issue *labels* for any repository
 - Copy all available issue *labels* for any repository, including: `name, color, description`.
-- Use 3 different types of GitHub authentication: (*none, OAuth2 token, username/password*)
-- Test your current GitHub request status showing your: *rate limit, ramining requests, quota refresh time*.
+- Use 2 different types of GitHub authentication: (*none, OAuth2 token*)  
+  (The GitHub Authentication API has discontinued allowing the use of *username/password*.)
+- Test your current GitHub request status showing your: *rate limit, remaining requests, quota refresh time*.
 - Test your authentication token
-- Learn about Ruby CLI options
-- [ ] Decide to keep originally closed issues as closed or opened.
-- [ ] Use the included class in your own tools
 
 
 **Q:** *What does it **not** do?*
@@ -41,12 +35,64 @@ But it can do much more. You can also:
 - Does not copy issue-author. You will be the new author of all moved issues.
 - Does not copy comment-authors. You will be the new author of all moved issue comments.
 - Does not copy PR's. (But script can be easily modified to do so.)
+- Does not replace the highly useful GitHub CLI tools [`gh`]() and [`hub`]().
+
 
 **Q:** *Why is this needed?*
 
 Sometimes, the structure of your project changes so drastically that it would break your repository.
 You need an easy way to start from scratch and just commit everything to a new repository.
-But, you've got all these valuable issues in the old repository on Github. 
+But, you've got all these valuable issues in the old repository on Github. Unfortunately, the new `gh` 
+tool only copies (*transfer*) one issue at the time, and with no additional control. 
+
+For any GitHub CLI usage, it is highly recommended to also install either [`gh`](https://cli.github.com/) or [`hub`](https://hub.github.com/).
+Both these tools allow you to do native GitHub Pull Requests.
+
+<details>
+<summary>ClickMe! How to do a PR from CLI</summary>
+
+There are 3 different ways to issue a native GitHub PR, depending on `gh` or `hub`.
+
+* Using the `curl` with the [API](https://docs.github.com/en/rest/reference/pulls#create-a-pull-request)
+* Using [gh](https://cli.github.com/manual/gh_pr_create)
+* Using [hub](https://hub.github.com/hub-pull-request.1.html)
+
+
+```bash
+#------------------------------------------------
+# Using 'curl'
+#------------------------------------------------
+curl -X POST -H "Accept: application/vnd.github.v3+json" \
+  https://api.github.com/repos/octocat/hello-world/pulls \
+  -d '{"head":"head","base":"base"}'
+
+#------------------------------------------------
+# Using 'gh' CLI
+#------------------------------------------------
+
+# Doing a simple PR using gh: 
+gh pr create --title "Pull request title" --body "Pull request body"
+
+# To autofill the title and body of a pull request from your commits:
+gh pr create --fill
+
+# To specify branches
+# where: 
+#   -B, --base <branch>     : The branch into which you want your code merged
+#   -H, --head <branch>     : The branch that contains commits for your pull request (default: current branch)
+gh pr create --base develop --head monalisa:feature
+
+#------------------------------------------------
+# Using 'hub' CLI
+#------------------------------------------------
+# open a pull request for the branch you've just pushed
+hub pull-request
+
+# open a pull request with title & body from a file
+hub pull-request --copy -F prepared-message.md
+```
+
+</details>
 
 
 **Q:** *Why are you using Ruby?*
@@ -130,26 +176,30 @@ ruby.exe .\missue.rb -r "YOUR_40_CHAR_OATH2_TOKEN"
 
 ### Usage
 
+<details>
+<summary>Click To See Usage!</summary>
+
 ```
- $ ruby.exe .\missue.rb -h
+$ ruby.exe .\bin\missue.rb -h
 
 Description:
 
-    gh-missue is a Ruby program that migrate issues from one github repository to another.
+    gh-missue is a Ruby program that bulk migrate issues from one github repository to another.
     Please note that you can only migrate issues to your own repo, unless you have an OAuth2
-    authentication token.
+    authentication token. You can also list all the open or closed issues and PR's along with
+    the colored labels. It also include the original author's name and URL of the issues copied.
 
   Usage:
-        ./missue.rb [-c | -n <ilist> | -t <itype>] <source_repo> <target_repo>
-        ./missue.rb [-c | -n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
-        ./missue.rb [-c | -n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
-        ./missue.rb [-d] -l <itype> [<oauth2_token>] <repo>
-        ./missue.rb -n <ilist>
-        ./missue.rb -t <itype>
-        ./missue.rb [-d] -r [<oauth2_token>]
-        ./missue.rb -d
-        ./missue.rb -v
-        ./missue.rb -h
+        missue.rb [-c | -n <ilist> | -t <itype>] <source_repo> <target_repo>
+        missue.rb [-c | -n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
+        missue.rb [-c | -n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
+        missue.rb [-d] -l <itype> [<oauth2_token>] <repo>
+        missue.rb -n <ilist>
+        missue.rb -t <itype>
+        missue.rb [-d] -r [<oauth2_token>]
+        missue.rb -d
+        missue.rb -v
+        missue.rb -h
 
   Options:
 
@@ -164,14 +214,21 @@ Description:
 
   Examples:
 
-        ./missue.rb -r
-        ./missue.rb -l open E3V3A/MMM-VOX
-        ./missue.rb -t closed "E3V3A/TESTO" "USERNAME/REPO"
-        ./missue.rb -n 1,4-5 "E3V3A/TESTO" "USERNAME/REPO"
+        missue.rb -r
+        missue.rb -l open E3V3A/gh-missue
+        missue.rb -t closed "E3V3A/TESTO" "USERNAME/REPO"
+        missue.rb -n 1,4-5 "E3V3A/TESTO" "USERNAME/REPO"
 
   Dependencies:
-        ./missue.rb depends on the following gem packages: octokit, docopt.
+        missue.rb depends on the following gem packages: octokit, docopt.
+
+  Bugs or Issues?
+        Please report bugs or issues here:
+        https://github.com/E3V3A/gh-missue
+
 ```
+
+</details>
 
 
 ---
@@ -224,6 +281,8 @@ Feel free to fork, break, fix and contribute. Enjoy!
 * [Ruby in 20 minutes](https://www.ruby-lang.org/en/documentation/quickstart/)
 * [Installing Ruby on Rail on RPi3](http://jeanbrito.com/2017/01/23/installing-ruby2-4-on-rails5-environment-on-raspberry-pi-3/)
 * [How to write a Gemfile](https://collectiveidea.com/blog/archives/2014/09/17/how-we-write-a-gemfile)
+* The GitHub CLI tool [`gh`](https://github.com/cli/cli)
+* The GitHub CLI tool [`hub`](https://github.com/github/hub)
 
 
 **Essential GitHub API documents:**
