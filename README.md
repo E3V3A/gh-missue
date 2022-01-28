@@ -20,7 +20,9 @@ But it can do much more. You can also:
 - `WIP` Migrate originally *closed* issues as *closed* **or** *opened*.
 - List any/all issues in any puplic repository
 - List or migrate only issues selected by their *status*: `[all, open, closed]`
+- Migrate issues selected by their issue *numbers*, like `1,5-7,12`
 - List all available issue *labels* for any repository
+- List all repos R/W access availability info using your current access token.
 - Copy all available issue *labels* for any repository, including: `name, color, description`.
 - Use 2 different types of GitHub authentication: (*none, OAuth2 token*)  
   (The GitHub Authentication API has discontinued allowing the use of *username/password*.)
@@ -53,7 +55,7 @@ Both these tools allow you to do native GitHub Pull Requests.
 
 There are 3 different ways to issue a native GitHub PR, depending on `gh` or `hub`.
 
-* Using the `curl` with the [API](https://docs.github.com/en/rest/reference/pulls#create-a-pull-request)
+* Using `curl` with the [API](https://docs.github.com/en/rest/reference/pulls#create-a-pull-request)
 * Using [gh](https://cli.github.com/manual/gh_pr_create)
 * Using [hub](https://hub.github.com/hub-pull-request.1.html)
 
@@ -71,7 +73,7 @@ curl -X POST -H "Accept: application/vnd.github.v3+json" \
 #------------------------------------------------
 
 # Doing a simple PR using gh: 
-gh pr create --title "Pull request title" --body "Pull request body"
+gh pr create --title "PR Title" --body "PR Body"
 
 # To autofill the title and body of a pull request from your commits:
 gh pr create --fill
@@ -80,7 +82,7 @@ gh pr create --fill
 # where: 
 #   -B, --base <branch>     : The branch into which you want your code merged
 #   -H, --head <branch>     : The branch that contains commits for your pull request (default: current branch)
-gh pr create --base develop --head monalisa:feature
+gh pr create --base develop --head MYUSER:my-branch
 
 #------------------------------------------------
 # Using 'hub' CLI
@@ -88,8 +90,15 @@ gh pr create --base develop --head monalisa:feature
 # open a pull request for the branch you've just pushed
 hub pull-request
 
+# specify title and body
+hub pull-request -m "PR Title" -m "PR Body"
+
+#  creates a pull request with explicit base and head branches
+hub pull-request --base OWNER:master --head MYUSER:my-branch
+
 # open a pull request with title & body from a file
 hub pull-request --copy -F prepared-message.md
+
 ```
 
 </details>
@@ -163,6 +172,9 @@ We are now in the public repo, under [`missue`](https://rubygems.org/gems/missue
 ```Ruby
 # check version:
 ruby.exe -v
+
+# Set your GITHUB_OAUTH_TOKEN as an environment variable (here in Powershell)
+$env:GITHUB_OAUTH_TOKEN = 'YOUR_40_CHAR_OATH2_TOKEN'
 
 # List the current open issues (and labels) for this repo:
 ruby.exe .\missue.rb -l open "YOUR_40_CHAR_OATH2_TOKEN" "E3V3A/gh-missue"

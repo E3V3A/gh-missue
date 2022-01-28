@@ -3,8 +3,8 @@
 #==================================================================================================
 # Author:       E:V:A
 # Date:         2018-04-10
-# Change:       2022-01-25
-# Version:      1.0.2
+# Change:       2022-01-28
+# Version:      1.0.3
 # License:      ISC
 # Formatting    UTF-8 with 4-space TAB stops and no TAB chars.
 # URL:          https://github.com/E3V3A/gh-missue
@@ -17,37 +17,50 @@
 #       [1] docopt  https://github.com/docopt/docopt.rb/        # option parser
 #       [2] octokit https://github.com/octokit/octokit.rb/      # GitHubs API library
 # 
-# NOTE:
+# Development Notes:
 #
+#   - To print new lines, you have to use "\n", not '\n'.
+#   - Ruby function options template:
+#       def testing(a, b = 1, *c, d: 1, **x)  { p a,b,c,d,x }
+#       testing('a', 'b', 'c', 'd', 'e', d: 2, x: 1) 
+#       # => ["a", "b", ["c", "d", "e"], 2, {:x=>1}]
+#
+# Installation:
+# 
 #   1. To make this run, you need to install Ruby with:
 #           (a) winget install ruby
 #           (b) gem install octokit
 #           (c) gem install docopt
+#           (d) gem install missue
 #
-#   2. Clone latest version of this file
-# 
-#   3. You should also consider creating a personal authentication token on GitHub,
-#      to avoid getting rate-limited by a large number of requests in short time.
+#   2. You also have to create a personal authentication token on GitHub, in order 
+#      to copy and avoid getting rate-limited by a large number of requests in short time.
 #
 # ToDo: 
 #   
-#   [ ] Add -a option to NOT copy original author & URL into migrated issue
-#   [ ] Fix username/password authentication ?? (Maybe Deprecated?)
-#   [ ] Check environment variable for OAUTH token:   
-#       access_token = "#{ENV['GITHUB_OAUTH_TOKEN']}"
-#   [ ] Fix inclusion of CLI options: -d, -n  
+#   [ ] Add pagination handling in repo_access():
+#       https://github.com/octokit/octokit.rb/issues/732
+#   [ ] Write a more efficient pull_source_issues()  (Now using ~6 requests per moved issue?)
+#   [ ] Switch meaning of (itype vs. istat): "itype" should be [issue, pr] and "istat" should be [open,closed,all].
+#   [ ] Add -o option to NOT copy original author & URL into migrated issue
+#   [ ] Add -k option to copy previously 'closed' issues as 'open' [keep, open, closed]
+#   [ ] Add -a put this as a CLI option for showing repo_access()
+#   [ ] Add -p <itype> option to select only pr vs issue. <itype> = [issue, pr]
+#   [x] Fix inclusion of CLI options: -d, -n  
 #       -d              - show debug info with full option list, raw requests & responses etc.
 #       -n  <1,3-6,9>   - only migrate issues given by the list. Can be a range.
-#   [/] Fix new Authentication issues
+#   [x] Fix new Authentication issues
+#   [ ] Fix username/password authentication ?? (Maybe Deprecated?)
+#   [x] Check environment variable for OAUTH token:   
+#       access_token = "#{ENV['GITHUB_OAUTH_TOKEN']}"
 #   [ ] Make the issue vs PR selection smarter! 
 #       - Now it just takes ALL and filters using list_source_issues()
-#   [ ] ? Add <type> option to selec pr, vs issue:  '-p <type>'   where <type> = [issue, pr]
 # 
 # References:
 # 
 #   [1] https://developer.github.com/changes/2020-02-10-deprecating-auth-through-query-param/
 #   [2] https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
-#   [3] 
+#   [3] https://stackoverflow.com/questions/3219229/why-does-array-slice-behave-differently-for-length-n
 # 
 #==================================================================================================
 require 'pathname'
@@ -56,57 +69,65 @@ require 'octokit'
 require 'net/http'
 require 'json'
 
-VERSION = '1.0.2'
+VERSION = '1.0.3'
 options = {}
 
 # Remap __FILE__ to avoid long path on '-h' help page
+# NOTE: We could also use: $0 - The name of the ruby script file currently executing
+#       puts "File: #{$0}" # Same problem!
 pn = Pathname.new(__FILE__)
 __BASE__ = pn.basename
 
 #--------------------------------------------------------------------------------------------------
 # The cli options parser
 #--------------------------------------------------------------------------------------------------
+# Usage: http://docopt.org/
 doc = <<DOCOPT
-
+.
   Description:
 
-    gh-missue is a Ruby program that migrate issues from one github repository to another.
+    gh-missue is a Ruby program that bulk migrate issues from one github repository to another.
     Please note that you can only migrate issues to your own repo, unless you have an OAuth2
-    authentication token.
+    authentication token. You can also list all the open or closed issues and PR's along with 
+    the colored labels. It also include the original author's name and URL of the issues copied.
+    The <oauth2_token> can be omitted if it is defined in the 'GITHUB_OAUTH_TOKEN' environmental 
+    variable.
 
   Usage:
-        #{__BASE__} [-c | -n <ilist> | -t <itype>] <source_repo> <target_repo>
-        #{__BASE__} [-c | -n <ilist> | -t <itype>] <oauth2_token> <source_repo> <target_repo>
-        #{__BASE__} [-c | -n <ilist> | -t <itype>] <username> <password> <source_repo> <target_repo>
+        #{__BASE__} -c [<oauth2_token>] <source_repo> <target_repo>
+        #{__BASE__} [-d] -n <ilist> [<oauth2_token>] <source_repo> <target_repo>
+        #{__BASE__} [-d] -t <itype> [<oauth2_token>] <source_repo> <target_repo>
         #{__BASE__} [-d] -l <itype> [<oauth2_token>] <repo>
-        #{__BASE__} -n <ilist>
-        #{__BASE__} -t <itype>
         #{__BASE__} [-d] -r [<oauth2_token>]
-        #{__BASE__} -d
+        #{__BASE__} -a [<oauth2_token>]
         #{__BASE__} -v
         #{__BASE__} -h
 
   Options:
 
-        -c                  - only copy all issue labels from <source> to <target> repos, including name, color and description
-        -l <itype> <repo>   - list available issues of type <itype> (all,open,closed) and all labels in repository <repo>
-        -t <itype>          - specify what type (all,open,closed) of issues to migrate. [default: open]
+        -a                  - show your Read/Write accees status on all your repositories. 
+        -c                  - copy (only) the issue labels from <source> to <target> repos, including name, color and description.
+        -l <itype> <repo>   - list all issues of type <itype> (all, open, closed) and all labels in repository <repo>
+        -n <ilist>          - only migrate specific issues given by a comma separated list of numbers, including ranges.
+        -t <itype>          - specify the type of issues to migrate. [default: open]
         -r                  - show current rate limit and authentication method for your IP
         -d                  - show debug info with full option list, raw requests & responses etc.
-        -n <ilist>          - only migrate issues with comma separated numbers given by the list. Can include a range.
         -h, --help          - show this help message and exit
         -v, --version       - show version and exit
 
   Examples:
 
         #{__BASE__} -r
-        #{__BASE__} -l open E3V3A/MMM-VOX
+        #{__BASE__} -l open E3V3A/gh-missue
         #{__BASE__} -t closed "E3V3A/TESTO" "USERNAME/REPO"
         #{__BASE__} -n 1,4-5 "E3V3A/TESTO" "USERNAME/REPO"
 
   Dependencies:
         #{__BASE__} depends on the following gem packages: octokit, docopt.
 
+  Bugs or Issues?
+        Please report bugs or issues here:
+        https://github.com/E3V3A/gh-missue
 DOCOPT
 
 #--------------------------------------------------------------------------------------------------
@@ -123,13 +144,17 @@ class IssueMigrator
         s = "\e[48;2;#{r};#{g};#{b}m  \e[0m"
     end
     
+    def getToken
+        access_token = "#{ENV['GITHUB_OAUTH_TOKEN']}" # @access_token ???
+    end
+
     # curl -v -H "Authorization: token <MY-40-CHAR-TOKEN>" \ 
     #         -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/E3V3A/gh-missue/issues
     def initialize(access_token, source_repo, target_repo)
         @client = Octokit::Client.new( 
             :access_token => access_token,
-            :accept => 'application/vnd.github.v3+json',
-            :headers => { "Authorization" => "token " + access_token },
+            :accept       => 'application/vnd.github.v3+json',
+            :headers      => { "Authorization" => "token " + access_token },
             # :headers => { "X-GitHub-OTP" => "<your 2FA token>" }
 
             # // Personal OAuth2 Access Token
@@ -148,19 +173,49 @@ class IssueMigrator
         @source_repo = source_repo
         @target_repo = target_repo
         @itype = itype
+        @ilist = ilist      # 2022-01-27 18:48:35
     end
 
-    def pull_source_issues(itype) # ilist => nil ??
+    def pull_source_issues(itype, ilist = nil)
         @client.auto_paginate = true
-        @issues = @client.issues(@source_repo, :state => itype)     # The issue type:   <itype>: [open/closed/all]
-        # @issues = @client.issues(@source_repo, :issue => ilist)   # The issue list:   <ilist>: "1,2,5-7,19"
-        puts "Found #{issues.size} issues of type: #{itype}\n"
+
+        puts "\n  <itype>: #{itype}"
+        puts "  <ilist>: #{ilist}\n"
+
+        # itype is a constant, while ilist is a list, so we need to iterate
+        # The issue list:   <ilist>: "1,2,5-7,19"
+        if itype
+            @issues = @client.issues(@source_repo, :state => itype)     # The issue type:   <itype>: [open/closed/all]
+        elsif ilist
+            #@issues = @client.issues(@source_repo, :state => 'all')
+            
+            #@issues.each do |source_issue|
+            #    print "Processing issue: #{source_issue.number}  (#{n}/#{issues.size})\r"
+            #    if !source_issue.key?(:pull_request) || source_issue.pull_request.empty?
+            #       #
+            #    end
+            #end
+
+            puts
+            my_array = []
+            ilist.each do |i|
+                puts "Adding issue [#]: #{i} \t from: #{@source_repo}\n"
+                my_array.push(@client.issue(@source_repo.freeze, "#{i}", accept: 'application/vnd.github.v3+json', :state => 'all'))
+                #@issues.push(@client.issue(@source_repo.freeze, "#{i}", accept: 'application/vnd.github.v3+json', :state => 'all'))
+            end
+            @issues = my_array
+        end
+        
+        opa = "#{@issues}".split(',').join(",\n")
+        puts "\n\n#{opa}\n\n" if $debug
+        
+        # ToDo: "itype" should be [issue, pr] and "istat" should be [open,closed,all].
+        puts "\nFound #{issues.size} issues of status: #{itype}\n"
     end
 
     def list_source_issues(itype)
         pull_source_issues(itype)
         @issues.each do |source_issue|
-            #puts "[#{source_issue.number}]\t  #{source_issue.title}"
             puts "[#{source_issue.number}]".ljust(10) + "#{source_issue.title}"
         end
         puts
@@ -172,9 +227,7 @@ class IssueMigrator
         puts "Found #{@labels.size} issue labels:"
         # ToDo: check and handle length (in case > 20)
         @labels.each do |label|
-            # ToDo:  Add "  " colored "boxes" using the color of the tag.
             color_box = hex2rgb("#{label.color}") + "  "
-            #puts "[#{label.color}]  " + "#{label.name}".ljust(20) + ": #{label.description}"
             puts "[#{label.color}]  " + color_box + "#{label.name}".ljust(20) + ": #{label.description}"
         end
         puts
@@ -188,9 +241,8 @@ class IssueMigrator
         puts "Copying labels..."
         tlabel = "" # nil
         @source_labels.each do |lbl|
-            # ToDo:  Add "  " colored "boxes" using the color of the tag.
-            #puts "[#{lbl.color}]  #{lbl.name} :  #{lbl.description}"
-            puts "[#{lbl.color}]  " + "#{lbl.name}".ljust(20) + ": #{lbl.description}"
+            #puts "[#{lbl.color}]  " + "#{lbl.name}".ljust(20) + ": #{lbl.description}"
+            puts "[#{label.color}]  " + color_box + "#{label.name}".ljust(20) + ": #{label.description}"
             #tlabel = {"name": lbl.name, "description": lbl.description, "color": lbl.color}
             #tlabel = {lbl.name, lbl.color, description: lbl.description}
             #lab = client.add_label(@target_repo.freeze, accept: 'application/vnd.github.symmetra-preview+json', tlabel)
@@ -205,27 +257,29 @@ class IssueMigrator
         n = 0
         @issues.each do |source_issue|
             n += 1
-            print "Processing issue: #{source_issue.number}  (#{n}/#{issues.size})\r"
+            print "Pushing issue: #{source_issue.number}  (#{n}/#{issues.size})\r"
             source_labels = get_source_labels(source_issue)
             source_comments = get_source_comments(source_issue)
+
+            # Only push if not a PR || empy         ??? 2022-01-27 19:42:37
             if !source_issue.key?(:pull_request) || source_issue.pull_request.empty?
 
                 # PR#2
                 issue_body = "*Originally created by @#{source_issue.user[:login]} (#{source_issue.html_url}):*\n\n#{source_issue.body}"
                 target_issue = @client.create_issue(@target_repo, source_issue.title, issue_body, {labels: source_labels})
 
-                #target_issue = @client.create_issue(@target_repo, source_issue.title, source_issue.body, {labels: source_labels})
-
                 push_comments(target_issue, source_comments) unless source_comments.empty?
+                
+                # Close target issue IF it was already closed!
+                # ToDo: -k switch!
                 @client.close_issue(@target_repo, target_issue.number) if source_issue.state === 'closed'
             end
             # We need to set a rate limit, even for OA2, it is 0.5 [req/sec]
-            sleep(90) if ( issues.size > 1 ) # [sec]
+            sleep(5) if ( issues.size > 1 ) # [sec]
         end
         puts "\n"
     end
 
-    # API bug:  missing color/description
     def get_source_labels(source_issue)
         labels = []
         source_issue.labels.each do |lbl|
@@ -254,8 +308,6 @@ end
 #--------------------------------------------------------------------------------------------------
 # MAIN
 #--------------------------------------------------------------------------------------------------
-
-#if __FILE__ == $0
 begin
 
     hLine = "-"*72
@@ -266,18 +318,53 @@ begin
         ilist.gsub(/(\d+)-(\d+)/) { ($1..$2).to_a.join(',') }.split(',').map(&:to_i).sort.uniq
     end
 
+    # ToDo: Add pagination handling!
+    def repo_access
+        hLine = "-"*72
+        redW = "\e[1;49;31mW\e[0m"      # red W
+        yelR = "\e[1;49;33mR\e[0m"      # yel R    
+        grnR = "\e[1;49;32mR\e[0m"      # grn R    
+        client = Octokit::Client.new(access_token: ENV['GITHUB_OAUTH_TOKEN'], accept: 'application/vnd.github.v3+json')
+        puts "\n" + hLine + "\n Repo Access\n" + hLine
+        client.repositories.each do |repository|
+            full_name       = repository[:full_name]
+            has_push_access = repository[:permissions][:push]
+            access_type = has_push_access ? redW : grnR
+            puts "  #{access_type}  : #{full_name}"
+        end
+        
+        puts "\n" + hLine + "\n Organizations\n" + hLine
+        client.organizations.each do |organization|
+            puts "  #{organization[:login]}"
+        end
+        puts hLine
+    end
+
     #----------------------------------------------------------------------
     # CLI Options
     #----------------------------------------------------------------------
     options = Docopt::docopt(doc, version: VERSION) # help: true
 
+    # Should never get here if docopt is set correcly
+    #if ( options['-n'] && options['-t'] ) 
+    #    puts "\n  ERROR: You cannot use both '-n' and '-t' options at the same time!\n"
+    #    exit
+    #end
+
+    if options['-a']
+        repo_access
+    end
+
     if options['-d']
         debug = true
-        #pp Docopt::docopt(doc, version: VERSION)
-        puts "\nAvailable options are:\n#{options.inspect}\n"
+        opa = "#{options.inspect}".split(',').join("\n")
+        #puts "\nAvailable options are:\n#{options.inspect}\n"
+        puts "\nAvailable options are:\n#{opa}\n"
         puts "\nThe supplied CLI options were:\n#{ARGV.inspect}\n\n"
     end
 
+    # This is possibly fucking up things, since it doesn't have an option flag.
+    # Perhaps add '-u' <token> as a new flag?
     if options['<oauth2_token>'] 
         access_token = options['<oauth2_token>']
         if access_token.size != 40 
@@ -298,6 +385,7 @@ begin
         itype = options['-l']
         source_repo = options['<repo>']
         target_repo = "E3V3A/TESTT" # a dummy repo
+
         im = IssueMigrator.new("#{access_token}", "#{source_repo}", "#{target_repo}")
         im.list_source_issues(itype)
         im.list_source_labels
@@ -306,11 +394,11 @@ begin
     # -n <ilist>
     if ( options['-n'] )
         ilist = options['-n']
-        puts "The \"-n\" option has not yet been implemented!"
-        puts "The supplied issue list: #{ilist}"
-        #sorted = ilist.split(",").sort_by(&:to_i)
+        #puts "The \"-n\" option has not yet been implemented!"
+        #puts "The supplied issue list: #{ilist}"
         sorted = sort_list(ilist)
         puts "The sorted issue list  : #{sorted}"
+        @ilist = sorted
     end
 
     # -r 
@@ -321,9 +409,6 @@ begin
 
     if ( options['-r'] )
 
-        #access_token = "#{ENV['GITHUB_OAUTH_TOKEN']}"
-        #access_token = "<MY-40-CHAR-TOKEN>"
-
         url = URI("https://api.github.com/rate_limit")
         http = Net::HTTP.new(url.host, url.port)
         http.use_ssl = true
@@ -331,6 +416,15 @@ begin
         req = Net::HTTP::Get.new(url)
         req["User-Agent"] = "gh-missue"
         req["Accept"]     = "application/vnd.github.v3+json"
+
+        # Try to get token from ENV
+        if not (access_token)
+            access_token = "#{ENV['GITHUB_OAUTH_TOKEN']}"
+            if (access_token == "")
+                access_token = nil
+                puts "No token found: using basic access"
+            end
+        end
 
         if (access_token)
             puts "Using access_token: #{access_token}" 
@@ -376,24 +470,43 @@ begin
             puts "  Search limit : #{rbs['limit']}"
             puts "  Remaining    : #{rbs['remaining']}"
             puts "  Refresh at   : #{RTs}"
+
+            # ToDo: put this as a CLI option
+            #repo_access # This is using 1 request to complete!
+
         end
     end
     
-    # MAIN
+    #------------------------------------------------------------
+    # MAIN - Do the migration 
+    #------------------------------------------------------------
+    # "and" or && ?? 2022-01-27 17:26:14
     if ( options['<source_repo>'] and options['<target_repo>'] )
         itype = options['-t']
         #ilist = options['-n']
-        #puts "<itype>: #{itype}"  # debug
+        
+        puts "\n<itype>: #{itype}"  if debug
+        puts "<ilist>: #{ilist}\n"  if debug
+
         source_repo = options['<source_repo>']
         target_repo = options['<target_repo>']
         im = IssueMigrator.new("#{access_token}", "#{source_repo}", "#{target_repo}")
+        
         if options['-c']
             im.create_target_labels
             exit
         end
-        #exit if options['-c']
-        im.pull_source_issues(itype)    # add ilist
-        #im.list_source_issues(itype)   # 
+        
+        if ilist
+            itype = nil
+            ilist = sort_list(ilist)
+            im.pull_source_issues(itype, ilist)
+        else
+            im.pull_source_issues(itype)
+        end
+
+        #im.pull_source_issues(itype)    # add ilist
+        ##im.list_source_issues(itype)   # 
         im.push_issues
     end
 

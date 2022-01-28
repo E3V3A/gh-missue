@@ -10,6 +10,18 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+#### [1.0.3] - 2022-01-28
+
+- Added being able to set authentication token as an Environmental variable, 
+  "GITHUB_OAUTH_TOKEN". Closes #11
+- Added -a switch for listing all repos R/W access info
+- Added -n switch for selecting issues based on their number
+- Fixed #8 "long path" shown when using the CLI '-h' help switch  
+- Removed Docs badge
+- Added Gem version badge
+- Updated README
+
+
 #### [1.0.2] - 2022-01-25
 
 - Fix for Authenticating with the new GitHub API changes 
