@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'missue'
-  s.version     = '1.0.2'
+  s.version     = '1.0.3'
   s.summary     = "Migrate github issues like a boss!"
   s.description = "List, migrate and batch copy issues and labels across github repos with links to original authors and issues."
   s.authors     = ["E3V3A"]

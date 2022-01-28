@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Added -a switch for listing all repos R/W access info
 - Added -n switch for selecting issues based on their number
 - Fixed #8 "long path" shown when using the CLI '-h' help switch  
+- Decreased sleep timer from 90s to 5s, per issue.
 - Removed Docs badge
 - Added Gem version badge
 - Updated README

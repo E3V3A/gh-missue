@@ -46,13 +46,6 @@
 #   [ ] Add -k option to copy previously 'closed' issues as 'open' [keep, open, closed]
 #   [ ] Add -a put this as a CLI option for showing repo_access()
 #   [ ] Add -p <itype> option to select only pr vs issue. <itype> = [issue, pr]
-#   [x] Fix inclusion of CLI options: -d, -n  
-#       -d              - show debug info with full option list, raw requests & responses etc.
-#       -n  <1,3-6,9>   - only migrate issues given by the list. Can be a range.
-#   [x] Fix new Authentication issues
-#   [ ] Fix username/password authentication ?? (Maybe Deprecated?)
-#   [x] Check environment variable for OAUTH token:   
-#       access_token = "#{ENV['GITHUB_OAUTH_TOKEN']}"
 #   [ ] Make the issue vs PR selection smarter! 
 #       - Now it just takes ALL and filters using list_source_issues()
 # 
@@ -82,6 +75,10 @@ __BASE__ = pn.basename
 # The cli options parser
 #--------------------------------------------------------------------------------------------------
 # Usage: http://docopt.org/
+# Use parenthesis "( )" to group elements when one of the mutually exclusive cases is required. 
+# Use brackets "[ ]" to group elements when none of the mutually exclusive cases is required.
+# 
+#--------------------------------------------------------------------------------------------------
 doc = <<DOCOPT
 .
   Description:
