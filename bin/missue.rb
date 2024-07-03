@@ -238,8 +238,9 @@ class IssueMigrator
         puts "Copying labels..."
         tlabel = "" # nil
         @source_labels.each do |lbl|
+	    color_box = hex2rgb("#{lbl.color}") + "  "
             #puts "[#{lbl.color}]  " + "#{lbl.name}".ljust(20) + ": #{lbl.description}"
-            puts "[#{label.color}]  " + color_box + "#{label.name}".ljust(20) + ": #{label.description}"
+            puts "[#{lbl.color}]  " + color_box + "#{lbl.name}".ljust(20) + ": #{lbl.description}"
             #tlabel = {"name": lbl.name, "description": lbl.description, "color": lbl.color}
             #tlabel = {lbl.name, lbl.color, description: lbl.description}
             #lab = client.add_label(@target_repo.freeze, accept: 'application/vnd.github.symmetra-preview+json', tlabel)
